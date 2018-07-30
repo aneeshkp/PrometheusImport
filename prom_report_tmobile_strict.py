@@ -25,105 +25,184 @@ writer = csv.writer(sys.stdout)
 labelList={}
 
 
+##
 
-labelList["perf_cpu_util:max1h"]        =   {"labels":("__name__","instance","cpu"),"sub_header":"max","filter":{"system":"CPU System Utilization Summary (percentage)","user":"CPU User Utilization Summary (percentage)"}}
-labelList["perf_cpu_util:min1h"]        =   {"labels":("__name__","instance","cpu"),"sub_header":"min","filter":{"system":"CPU System Utilization Summary (percentage)","user":"CPU User Utilization Summary (percentage)"}}
-labelList["perf_cpu_util:avg1h"]        =   {"labels":("__name__","instance","cpu"),"sub_header":"avg","filter":{"system":"CPU System Utilization Summary (percentage)","user":"CPU User Utilization Summary (percentage)"}}
+#labelList["CPU System Utilization Summary (percentage)"]        =  {"metrics":[{"name":"perf_cpu_system_util:max1h","header":"Max","per":"cpu"},
+#                                                                          {"name":"perf_cpu_system_util:min1h","header":"Min","per":"cpu"},
+#                                                                          {"name":"perf_cpu_system_util:avg1h","header":"Avg","per":"cpu"}],
+#                                                                    "labels":("__name__","instance","cpu")}
 
-labelList["perf_disk_util:avg1h"]       =   {"labels":("__name__","instance","df")}
-labelList["perf_disk_util:max1h"]       =   {"labels":("__name__","instance","df")}
-labelList["perf_disk_util:min1h"]       =   {"labels":("__name__","instance","df")}
+#labelList["CPU User Utilization Summary (percentage)"]        =   {"metrics":[{"name":"perf_cpu_user_util:max1h","header":"Max","per":"cpu"},
+#                                                                          {"name":"perf_cpu_user_util:min1h","header":"Min","per":"cpu"},
+#                                                                          {"name":"perf_cpu_user_util:avg1h","header":"Avg","per":"cpu"}],
+#                                                                    "labels":("__name__","instance","cpu")}
 
-labelList["perf_disk_write:max1h"]       =   {"labels":("__name__","instance","disk")}
-labelList["perf_disk_write:min1h"]       =   {"labels":("__name__","instance","disk")}
-labelList["perf_disk_write:avg1h"]       =   {"labels":("__name__","instance","disk")}
-
-labelList["perf_disk_read:max1h"]       =   {"labels":("__name__","instance","disk")}
-labelList["perf_disk_read:min1h"]       =   {"labels":("__name__","instance","disk")}
-labelList["perf_disk_read:avg1h"]       =   {"labels":("__name__","instance","disk")}
-
-labelList["perf_memory_util:max1h"]     =   {"labels":("__name__","instance","memory")}
-labelList["perf_memory_util:min1h"]     =   {"labels":("__name__","instance","memory")}
-labelList["perf_memory_util:avg1h"]     =   {"labels":("__name__","instance","memory")}
-
-labelList["perf_packet_drops_in:max1h"] =   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_drops_in:min1h"] =   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_drops_in:avg1h"] =   {"labels":("__name__","instance","interface")}
-
-labelList["perf_packet_drops_out:max1h"]=   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_drops_out:min1h"]=   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_drops_out:avg1h"]=   {"labels":("__name__","instance","interface")}
-
-labelList["perf_packet_errs_in:max1h"]  =   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_errs_in:min1h"]  =   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_errs_in:avg1h"]  =   {"labels":("__name__","instance","interface")}
-
-labelList["perf_packet_errs_out:max1h"] =   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_errs_out:min1h"] =   {"labels":("__name__","instance","interface")}
-labelList["perf_packet_errs_out:avg1h"] =   {"labels":("__name__","instance","interface")}
-
-labelList["perf_packets_in:max1h"]      =   {"labels":("__name__","instance","interface")}
-labelList["perf_packets_in:min1h"]      =   {"labels":("__name__","instance","interface")}
-labelList["perf_packets_in:avg1h"]      =   {"labels":("__name__","instance","interface")}
-
-labelList["perf_packets_out:max1h"]     =   {"labels":("__name__","instance","interface")}
-labelList["perf_packets_out:min1h"]     =   {"labels":("__name__","instance","interface")}
-labelList["perf_packets_out:avg1h"]     =   {"labels":("__name__","instance","interface")}
-
-labelList["perf_system_load:avg1h"]     =   {"labels":("__name__","instance")}
-labelList["perf_system_load:max1h"]     =   {"labels":("__name__","instance")}
-labelList["perf_system_load:min1h"]     =   {"labels":("__name__","instance")}
-
-labelList["perf_system_uptime:avg1h"]   =   {"labels":("__name__","instance")}
-labelList["perf_system_uptime:max1h"]   =   {"labels":("__name__","instance")}
-labelList["perf_system_uptime:min1h"]   =   {"labels":("__name__","instance")}
-
-for k, v in labelList.iteritems():
- print "{0} : {1}".format(k,v)
- print "Labels: {0} ".format(v["labels"])
- try:
-     print "Filters: {0} ".format(v["filter"])
-    # Do something
- except KeyError:
-    pass
-
-sys.exit(1)
+#labelList["Disk Utilization Summary (percentage)"]        =   {"metrics":[{"name":"perf_cpu_user_util:max1h","header":"Max","per":"cpu"},
+#                                                                          {"name":"perf_cpu_user_util:min1h","header":"Min","per":"cpu"},
+#                                                                          {"name":"perf_cpu_user_util:avg1h","header":"Avg","per":"cpu"}],
+#                                                                    "labels":("__name__","instance","cpu")}
 
 
-# Write the header,
+#labelList["Disk Utilization Summary (percentage)"]       =    {"metrics":[{"name":"perf_disk_util:max1h","header":"Max","per":"df"},
+#                                                                          {"name":"perf_disk_util:min1h","header":"Min","per":"df"},
+#                                                                          {"name":"perf_disk_util:avg1h","header":"Avg","per":"df"}],
+#                                                                    "labels":("__name__","instance","df")}
+
+
+#labelList["Disk Write Time (milliseconds)"]       =    {"metrics":[{"name":"perf_disk_write:max1h","header":"Max","per":"df"},
+#                                                                          {"name":"perf_disk_write:min1h","header":"Min","per":"df"},
+#                                                                          {"name":"perf_disk_write:avg1h","header":"Avg","per":"df"}],
+#                                                                    "labels":("__name__","instance","df")}
+
+
+#labelList["Disk Read Time (milliseconds)"]       =    {"metrics":[{"name":"perf_disk_read:max1h","header":"Max","per":"df"},
+#                                                                          {"name":"perf_disk_read:min1h","header":"Min","per":"df"},
+#                                                                          {"name":"perf_disk_read:avg1h","header":"Avg","per":"df"}],
+#                                                                    "labels":("__name__","instance","df")}
+
+#labelList["Memory Utlization Summary (percentage)"]       =    {"metrics":[{"name":"perf_memory_util:max1h","header":"Max","per":"None"},
+#                                                                          {"name":"perf_memory_util:min1h","header":"Min","per":"None"},
+#                                                                          {"name":"perf_memory_util:avg1h","header":"Avg","per":"None"}],
+#                                                                    "labels":("__name__","instance")}
+
+##
+
+
+labelList["Interface Drops (In)"]       =    {"metrics":[{"name":"perf_packet_drops_in:max1h","header":"Max","per":"interface"},
+                                                                          {"name":"perf_packet_drops_in:min1h","header":"Min","per":"interface"},
+                                                                          {"name":"perf_packet_drops_in:avg1h","header":"Avg","per":"interface"}],
+                                                                    "labels":("__name__","instance","interface")}
+
+
+
+labelList["Interface Drops (Out)"]       =    {"metrics":[{"name":"perf_packet_drops_out:max1h","header":"Max","per":"interface"},
+                                                                          {"name":"perf_packet_drops_out:min1h","header":"Min","per":"interface"},
+                                                                          {"name":"perf_packet_drops_out:avg1h","header":"Avg","per":"interface"}],
+                                                                    "labels":("__name__","instance","interface")}
+
+
+
+labelList["Interface Errors (In)"]       =    {"metrics":[{"name":"perf_packet_errs_in:max1h","header":"Max","per":"interface"},
+                                                                          {"name":"perf_packet_errs_in:min1h","header":"Min","per":"interface"},
+                                                                          {"name":"perf_packet_errs_in:avg1h","header":"Avg","per":"interface"}],
+                                                                    "labels":("__name__","instance","interface")}
+
+
+
+labelList["Interface Errors (Out)"]       =    {"metrics":[{"name":"perf_packet_errs_out:max1h","header":"Max","per":"interface"},
+                                                                          {"name":"perf_packet_errs_out:min1h","header":"Min","per":"interface"},
+                                                                          {"name":"perf_packet_errs_out:avg1h","header":"Avg","per":"interface"}],
+                                                                    "labels":("__name__","instance","interface")}
+
+
+
+labelList["Interface Packets (In)"]       =    {"metrics":[{"name":"perf_packets_in:max1h","header":"Max","per":"interface"},
+                                                                          {"name":"perf_packets_in:min1h","header":"Min","per":"interface"},
+                                                                          {"name":"perf_packets_in:avg1h","header":"Avg","per":"interface"}],
+                                                                    "labels":("__name__","instance","interface")}
+
+
+
+
+labelList["Interface Packets (Out)"]       =    {"metrics":[{"name":"perf_packets_out:max1h","header":"Max","per":"interface"},
+                                                                          {"name":"perf_packets_out:min1h","header":"Min","per":"interface"},
+                                                                          {"name":"perf_packets_out:avg1h","header":"Avg","per":"interface"}],
+                                                                    "labels":("__name__","instance","interface")}
+
+
+
+labelList["System Load"]       =    {"metrics":[{"name":"perf_system_load:max1h","header":"Max","per":"None"},
+                                                                          {"name":"perf_system_load:min1h","header":"Min","per":"None"},
+                                                                          {"name":"perf_system_load:avg1h","header":"Avg","per":"None"}],
+                                                                    "labels":("__name__","instance")}
+
+
+
+labelList["System Uptime"]       =    {"metrics":[{"name":"perf_system_uptime:max1h","header":"Max","per":"None"},
+                                                                          {"name":"perf_system_uptime:min1h","header":"Min","per":"None"},
+                                                                          {"name":"perf_system_uptime:avg1h","header":"Avg","per":"None"}],
+                                                                    "labels":("__name__","instance")}
+
+#Main Header
 
 if len(sys.argv) != 2:
     print('Usage: {0} http://prometheus:9090'.format(sys.argv[0]))
     sys.exit(1)
-metricNames=GetMetricNames(sys.argv[1])
 instances=set()
 instances=GetInstanceNames(sys.argv[1])
-
 writeHeader=True
+
+
 for instance in instances:
-    for metricName in metricNames:
-        if metricName.startswith("perf_"):
-            response = requests.get(sys.argv[1]+'/api/v1/query?query='+metricName+'{instance="'+instance+'"}')
-            #print(response.json())
+
+    #write all header first
+
+    header_row1 =  [""]
+    header_row1.append("")
+    header_row1.append("")
+    header_row2 =  ["Node"]
+    header_row2.append("Start Time")
+    header_row2.append("End time")
+    SanitizedResult = defaultdict(list)
+    SanitizedResult={"node":instance,"starttime":"","results":{}}
+    writeNewRow=True
+     #names= defaultdict(list)
+    for k, v in labelList.iteritems():
+        if k not in SanitizedResult["results"]:
+            #SanitizedResult["results"][k]={"Max":[],"Min":[],"Avg":[],"Per":v["metrics"][0]["per"],"Per_Value":[]}
+            SanitizedResult["results"][k]={"Max":[],"Min":[],"Avg":[],"Per":v["metrics"][0]["per"]}
+
+
+    #SanitizedResult={"node":instance,"starttime":"","name":"","results":{"matrix_name":["max":{},"min":{},"avg":{},"per_name":"","per_value":""]}}
+    #SanitizedResult={"node":instance,"starttime":"","name":"","results":{}}
+    #result={"matrix_name":["max":{},"min":{},"avg":{},"per_name":"","per_value":""]}
+    #result={"matrix_name":["max":{},"min":{},"avg":{},"per_name":"","per_value":""]}
+
+    for k, v in labelList.iteritems():
+        for data in v["metrics"]:
+            response = requests.get(sys.argv[1]+'/api/v1/query?query='+data["name"]+'{instance="'+instance+'"}')
             results = response.json()['data']["result"]
-            # Build a list of all labelnames used.
-            #gets all keys and discard __name__
-            labelnames = set()
             for result in results:
-                labelnames.update(result["metric"].keys())
-            # Canonicalize
-            labelnames.discard('__name__')
-            labelnames.discard('instance')
-            labelnames = sorted(labelnames)
-            # Write the samples.
-            if writeHeader:
-                writer.writerow(['name', 'timestamp', 'value'] + labelnames)
-                writeHeader=False
-            for result in results:
-                l =  [instance]
-                l.append(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0])) )
-                l.append(result['metric'].get('__name__', ''))
-                for label in labelnames:
-                    l.append(result['metric'].get(label, ''))
-                l.append(result['value'][1])
-                writer.writerow(l)
+
+                SanitizedResult["starttime"]=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]-3600))
+                SanitizedResult["endtime"]=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]))
+                SanitizedResult["results"][k].get(data["header"], '').append({"value":result['value'][1],"per":data["per"],"per_value":result['metric'].get(data["per"], '')})
+
+        #write first row
+        #writer.writerow([' ', ' ', ' '] + labelnames)
+        if writeNewRow==True:
+            data_row=[SanitizedResult["node"]]
+            data_row.append(SanitizedResult["starttime"])
+            data_row.append(SanitizedResult["endtime"])
+
+            writeNewRow=False
+
+        for key,value in SanitizedResult["results"].iteritems():
+            #print SanitizedResult["results"][item]
+            for index,item in enumerate(value["Max"]):
+                header_row2.append("Max")
+                header_row2.append("Avg")
+                header_row2.append("Min")
+                try:
+                    header_row1.append(key+ "_for_" + value["Max"][index]["per"] + value["Max"][index]["per_value"])
+                    data_row.append(value["Max"][index]["value"])
+                except IndexError:
+                    header_row1.append(key + "_for_ error")
+                    data_row.append(0)
+                try:
+                    header_row1.append(key+ "_for_" + value["Max"][index]["per"] + value["Max"][index]["per_value"])
+                    data_row.append(value["Avg"][index]["value"])
+                except IndexError:
+                    data_row.append(0)
+                    header_row1.append(key + "_for_ error")
+                try:
+                    header_row1.append(key+ "_for_" + value["Max"][index]["per"] + value["Max"][index]["per_value"])
+                    data_row.append(value["Min"][index]["value"])
+                except IndexError:
+                    data_row.append(0)
+                    header_row1.append(key + "_for_ error")
+
+
+    writer.writerow(header_row1)
+    writer.writerow(header_row2)
+    writer.writerow(data_row)
