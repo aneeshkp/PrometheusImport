@@ -174,33 +174,36 @@ for instance in instances:
             data_row=[SanitizedResult["node"]]
             data_row.append(SanitizedResult["starttime"])
             data_row.append(SanitizedResult["endtime"])
-
             writeNewRow=False
 
-        for key,value in SanitizedResult["results"].iteritems():
-            #print SanitizedResult["results"][item]
-            for index,item in enumerate(value["Max"]):
-                header_row2.append("Max")
-                header_row2.append("Avg")
-                header_row2.append("Min")
-                try:
-                    header_row1.append(key+ "_for_" + value["Max"][index]["per"] + value["Max"][index]["per_value"])
-                    data_row.append(value["Max"][index]["value"])
-                except IndexError:
-                    header_row1.append(key + "_for_ error")
-                    data_row.append(0)
-                try:
-                    header_row1.append(key+ "_for_" + value["Max"][index]["per"] + value["Max"][index]["per_value"])
-                    data_row.append(value["Avg"][index]["value"])
-                except IndexError:
-                    data_row.append(0)
-                    header_row1.append(key + "_for_ error")
-                try:
-                    header_row1.append(key+ "_for_" + value["Max"][index]["per"] + value["Max"][index]["per_value"])
-                    data_row.append(value["Min"][index]["value"])
-                except IndexError:
-                    data_row.append(0)
-                    header_row1.append(key + "_for_ error")
+    for key,value in SanitizedResult["results"].iteritems():
+
+        #for index,item in enumerate(value["Max"]):
+            #print item["per_value"]
+            #value["Max"][index]["per_value"]
+
+        for index,item in enumerate(value["Max"]):
+            header_row2.append("Max")
+            header_row2.append("Avg")
+            header_row2.append("Min")
+            try:
+                data_row.append(value["Max"][index]["value"])
+                header_row1.append(key+ " : " + value["Max"][0]["per"] + " : " + value["Max"][index]["per_value"])
+            except IndexError:
+                data_row.append(-1)
+                header_row1.append(key + "_for_ error")
+            try:
+                data_row.append(value["Avg"][index]["value"])
+                header_row1.append(key+ " : " + value["Max"][0]["per"] + " : " + value["Max"][index]["per_value"])
+            except IndexError:
+                data_row.append(-1)
+                header_row1.append(key + "_for_ error")
+            try:
+                data_row.append(value["Min"][index]["value"])
+                header_row1.append(key+ " : " + value["Max"][0]["per"] + " : " + value["Max"][index]["per_value"])
+            except IndexError:
+                data_row.append(-1)
+                header_row1.append(key + "_for_ error")
 
 
     writer.writerow(header_row1)
