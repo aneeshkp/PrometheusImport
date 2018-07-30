@@ -3,6 +3,7 @@ import requests
 import sys
 import time
 from collections import defaultdict
+from optparse import OptionParser
 def GetMetricNames(url):
     response = requests.get('{0}/api/v1/label/__name__/values'.format(url))
     results = response.json()['data']
@@ -11,61 +12,69 @@ def GetMetricNames(url):
     return results
 
 def GetInstanceNames(url):
-    response = requests.get('{0}/api/v1/series?match[]=collectd_uptime'.format(sys.argv[1]))
+    response = requests.get('{0}/api/v1/series?match[]=collectd_uptime'.format(url))
     results = response.json()['data']
     instances = set()
     for result in results:
         instances.add(result.get("instance",''))
     return instances
 
+def GetReportHeader(mname,per,pervalue):
+    if per=="None":
+        return mname
+    else:
+        return "{0}:{1}:{2}".format(mname,per,pervalue)
+
+
 """
 A simple program to print the result of a Prometheus query as CSV.
 """
+
+
+
 writer = csv.writer(sys.stdout)
 labelList={}
 
 
 ##
 
-#labelList["CPU System Utilization Summary (percentage)"]        =  {"metrics":[{"name":"perf_cpu_system_util:max1h","header":"Max","per":"cpu"},
-#                                                                          {"name":"perf_cpu_system_util:min1h","header":"Min","per":"cpu"},
-#                                                                          {"name":"perf_cpu_system_util:avg1h","header":"Avg","per":"cpu"}],
-#                                                                    "labels":("__name__","instance","cpu")}
+labelList["CPU System Utilization Summary (percentage)"]        =  {"metrics":[{"name":"perf_cpu_system_util:max1h","header":"Max","per":"cpu"},
+                                                                          {"name":"perf_cpu_system_util:min1h","header":"Min","per":"cpu"},
+                                                                          {"name":"perf_cpu_system_util:avg1h","header":"Avg","per":"cpu"}],
+                                                                    "labels":("__name__","instance","cpu")}
 
-#labelList["CPU User Utilization Summary (percentage)"]        =   {"metrics":[{"name":"perf_cpu_user_util:max1h","header":"Max","per":"cpu"},
-#                                                                          {"name":"perf_cpu_user_util:min1h","header":"Min","per":"cpu"},
-#                                                                          {"name":"perf_cpu_user_util:avg1h","header":"Avg","per":"cpu"}],
-#                                                                    "labels":("__name__","instance","cpu")}
+labelList["CPU User Utilization Summary (percentage)"]        =   {"metrics":[{"name":"perf_cpu_user_util:max1h","header":"Max","per":"cpu"},
+                                                                          {"name":"perf_cpu_user_util:min1h","header":"Min","per":"cpu"},
+                                                                          {"name":"perf_cpu_user_util:avg1h","header":"Avg","per":"cpu"}],
+                                                                    "labels":("__name__","instance","cpu")}
 
-#labelList["Disk Utilization Summary (percentage)"]        =   {"metrics":[{"name":"perf_cpu_user_util:max1h","header":"Max","per":"cpu"},
-#                                                                          {"name":"perf_cpu_user_util:min1h","header":"Min","per":"cpu"},
-#                                                                          {"name":"perf_cpu_user_util:avg1h","header":"Avg","per":"cpu"}],
-#                                                                    "labels":("__name__","instance","cpu")}
-
-
-#labelList["Disk Utilization Summary (percentage)"]       =    {"metrics":[{"name":"perf_disk_util:max1h","header":"Max","per":"df"},
-#                                                                          {"name":"perf_disk_util:min1h","header":"Min","per":"df"},
-#                                                                          {"name":"perf_disk_util:avg1h","header":"Avg","per":"df"}],
-#                                                                    "labels":("__name__","instance","df")}
+labelList["Disk Utilization Summary (percentage)"]        =   {"metrics":[{"name":"perf_cpu_user_util:max1h","header":"Max","per":"cpu"},
+                                                                          {"name":"perf_cpu_user_util:min1h","header":"Min","per":"cpu"},
+                                                                          {"name":"perf_cpu_user_util:avg1h","header":"Avg","per":"cpu"}],
+                                                                    "labels":("__name__","instance","cpu")}
 
 
-#labelList["Disk Write Time (milliseconds)"]       =    {"metrics":[{"name":"perf_disk_write:max1h","header":"Max","per":"df"},
-#                                                                          {"name":"perf_disk_write:min1h","header":"Min","per":"df"},
-#                                                                          {"name":"perf_disk_write:avg1h","header":"Avg","per":"df"}],
-#                                                                    "labels":("__name__","instance","df")}
+labelList["Disk Utilization Summary (percentage)"]       =    {"metrics":[{"name":"perf_disk_util:max1h","header":"Max","per":"df"},
+                                                                          {"name":"perf_disk_util:min1h","header":"Min","per":"df"},
+                                                                          {"name":"perf_disk_util:avg1h","header":"Avg","per":"df"}],
+                                                                    "labels":("__name__","instance","df")}
 
 
-#labelList["Disk Read Time (milliseconds)"]       =    {"metrics":[{"name":"perf_disk_read:max1h","header":"Max","per":"df"},
-#                                                                          {"name":"perf_disk_read:min1h","header":"Min","per":"df"},
-#                                                                          {"name":"perf_disk_read:avg1h","header":"Avg","per":"df"}],
-#                                                                    "labels":("__name__","instance","df")}
+labelList["Disk Write Time (milliseconds)"]       =    {"metrics":[{"name":"perf_disk_write:max1h","header":"Max","per":"disk"},
+                                                                          {"name":"perf_disk_write:min1h","header":"Min","per":"disk"},
+                                                                          {"name":"perf_disk_write:avg1h","header":"Avg","per":"disk"}],
+                                                                    "labels":("__name__","instance","disk")}
 
-#labelList["Memory Utlization Summary (percentage)"]       =    {"metrics":[{"name":"perf_memory_util:max1h","header":"Max","per":"None"},
-#                                                                          {"name":"perf_memory_util:min1h","header":"Min","per":"None"},
-#                                                                          {"name":"perf_memory_util:avg1h","header":"Avg","per":"None"}],
-#                                                                    "labels":("__name__","instance")}
 
-##
+labelList["Disk Read Time (milliseconds)"]       =    {"metrics":[{"name":"perf_disk_read:max1h","header":"Max","per":"disk"},
+                                                                          {"name":"perf_disk_read:min1h","header":"Min","per":"disk"},
+                                                                          {"name":"perf_disk_read:avg1h","header":"Avg","per":"disk"}],
+                                                                    "labels":("__name__","instance","disk")}
+
+labelList["Memory Utlization Summary (percentage)"]       =    {"metrics":[{"name":"perf_memory_util:max1h","header":"Max","per":"memory"},
+                                                                      {"name":"perf_memory_util:min1h","header":"Min","per":"memory"},
+                                                                          {"name":"perf_memory_util:avg1h","header":"Avg","per":"memory"}],
+                                                                    "labels":("__name__","instance")}
 
 
 labelList["Interface Drops (In)"]       =    {"metrics":[{"name":"perf_packet_drops_in:max1h","header":"Max","per":"interface"},
@@ -124,12 +133,56 @@ labelList["System Uptime"]       =    {"metrics":[{"name":"perf_system_uptime:ma
                                                                     "labels":("__name__","instance")}
 
 #Main Header
+parser = OptionParser()
+parser.add_option("-n", "--nodes",action='store_true',help="list all nodes used for the report.")
+parser.add_option("-l", "--list",action='store_true',help="list all metrics name.")
+parser.add_option("-m", "--mfilter",dest="mfilter",help="Filter metrics by name.")
+parser.add_option("-s", "--nfilter",dest="nfilter",help="Filter metrics by node.")
+parser.add_option("-p", "--prometheus",dest="prom_host", help="http://promethues:9090")
 
-if len(sys.argv) != 2:
-    print('Usage: {0} http://prometheus:9090'.format(sys.argv[0]))
-    sys.exit(1)
+(options, args) = parser.parse_args()
+
 instances=set()
-instances=GetInstanceNames(sys.argv[1])
+#Check if list was selected
+if options.list is not None:
+    print "**********************************************"
+    print "*  List of recording rules metrics            *"
+    print "**********************************************"
+    for k, v in labelList.iteritems():
+        print k
+    sys.exit(1)
+
+if options.nodes is not None:
+    if options.prom_host is None:
+        options.prom_host = raw_input('Enter Prometheus serve (http://promserver:9090):')
+    instances=GetInstanceNames(options.prom_host)
+    print "**********************************************"
+    print "*  List of nodes                             *"
+    print "**********************************************"
+    for instance in instances:
+        print instance
+    sys.exit(1)
+
+#Check if filter was passed
+
+if options.mfilter is not None:
+    if options.mfilter not in labelList:
+        print "Error: Cannot filter Metrics[ {0} ]not found in the list".format(options.mfilter)
+        sys.exit(1)
+
+
+if options.prom_host is None:
+    options.prom_host = raw_input('Enter Prometheus serve (http://promserver:9090):')
+
+instances=GetInstanceNames(options.prom_host)
+#Check if filter was passed
+if options.nfilter is not None:
+    if options.nfilter not in instances:
+        print "Error: Cannot filter Nodes [ {0} ]not found in the list".format(options.nfilter)
+        sys.exit(1)
+    else:
+        instances=[options.nfilter]
+
 writeHeader=True
 
 
@@ -144,68 +197,50 @@ for instance in instances:
     header_row2.append("Start Time")
     header_row2.append("End time")
     SanitizedResult = defaultdict(list)
-    SanitizedResult={"node":instance,"starttime":"","results":{}}
+    SanitizedResult={"node":instance,"starttime":"","endtime":"","results":{}}
     writeNewRow=True
-     #names= defaultdict(list)
+
+
     for k, v in labelList.iteritems():
         if k not in SanitizedResult["results"]:
-            #SanitizedResult["results"][k]={"Max":[],"Min":[],"Avg":[],"Per":v["metrics"][0]["per"],"Per_Value":[]}
             SanitizedResult["results"][k]={"Max":[],"Min":[],"Avg":[],"Per":v["metrics"][0]["per"]}
-
-
-    #SanitizedResult={"node":instance,"starttime":"","name":"","results":{"matrix_name":["max":{},"min":{},"avg":{},"per_name":"","per_value":""]}}
-    #SanitizedResult={"node":instance,"starttime":"","name":"","results":{}}
-    #result={"matrix_name":["max":{},"min":{},"avg":{},"per_name":"","per_value":""]}
-    #result={"matrix_name":["max":{},"min":{},"avg":{},"per_name":"","per_value":""]}
-
-    for k, v in labelList.iteritems():
         for data in v["metrics"]:
-            response = requests.get(sys.argv[1]+'/api/v1/query?query='+data["name"]+'{instance="'+instance+'"}')
+            response = requests.get(options.prom_host+'/api/v1/query?query='+data["name"]+'{instance="'+instance+'"}')
             results = response.json()['data']["result"]
             for result in results:
-
+                #if result['metric'].get(data["per"],'')=="":
+                #    print result['metric']
                 SanitizedResult["starttime"]=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]-3600))
                 SanitizedResult["endtime"]=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]))
                 SanitizedResult["results"][k].get(data["header"], '').append({"value":result['value'][1],"per":data["per"],"per_value":result['metric'].get(data["per"], '')})
-
-        #write first row
-        #writer.writerow([' ', ' ', ' '] + labelnames)
         if writeNewRow==True:
             data_row=[SanitizedResult["node"]]
             data_row.append(SanitizedResult["starttime"])
             data_row.append(SanitizedResult["endtime"])
             writeNewRow=False
-
     for key,value in SanitizedResult["results"].iteritems():
-
-        #for index,item in enumerate(value["Max"]):
-            #print item["per_value"]
-            #value["Max"][index]["per_value"]
-
         for index,item in enumerate(value["Max"]):
             header_row2.append("Max")
             header_row2.append("Avg")
             header_row2.append("Min")
             try:
                 data_row.append(value["Max"][index]["value"])
-                header_row1.append(key+ " : " + value["Max"][0]["per"] + " : " + value["Max"][index]["per_value"])
+                header_row1.append(GetReportHeader(key,value["Max"][0]["per"],value["Max"][index]["per_value"]))
             except IndexError:
                 data_row.append(-1)
                 header_row1.append(key + "_for_ error")
             try:
                 data_row.append(value["Avg"][index]["value"])
-                header_row1.append(key+ " : " + value["Max"][0]["per"] + " : " + value["Max"][index]["per_value"])
+                header_row1.append(GetReportHeader(key,value["Avg"][0]["per"],value["Avg"][index]["per_value"]))
             except IndexError:
                 data_row.append(-1)
                 header_row1.append(key + "_for_ error")
             try:
                 data_row.append(value["Min"][index]["value"])
-                header_row1.append(key+ " : " + value["Max"][0]["per"] + " : " + value["Max"][index]["per_value"])
+                header_row1.append(GetReportHeader(key,value["Min"][0]["per"],value["Min"][index]["per_value"]))
             except IndexError:
                 data_row.append(-1)
                 header_row1.append(key + "_for_ error")
-
-
     writer.writerow(header_row1)
     writer.writerow(header_row2)
     writer.writerow(data_row)
