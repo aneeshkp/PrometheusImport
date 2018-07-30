@@ -39,7 +39,7 @@ def get_report_header(mname, per, pervalue):
     else:
         return "{0}:{1}:{2}".format(mname, per, pervalue)
 
-
+#global list
 labelList = {}
 
 labelList["CPU System Utilization Summary (percentage)"] = {"metrics":
@@ -132,118 +132,126 @@ labelList["System Uptime"] = {"metrics":
                                {"name":"perf_system_uptime:avg1h", "header":"Avg", "per":None}],
                               "labels":("__name__", "instance")}
 
-#Main Header
-parser = OptionParser()
-parser.add_option("-n", "--nodes", action='store_true', help="list all nodes used for the report.")
-parser.add_option("-l", "--list", action='store_true', help="list all metrics name.")
-parser.add_option("-m", "--mfilter", dest="mfilter", help="Filter metrics by name.")
-parser.add_option("-s", "--nfilter", dest="nfilter", help="Filter metrics by node.")
-parser.add_option("-p", "--prometheus", dest="prom_host", help="http://promethues:9090")
-
-(options, args) = parser.parse_args()
-
-instances = set()
-#Check if list was selected
-if options.list is not None:
-    print("**********************************************")
-    print("*  List of recording rules metrics            *")
-    print("**********************************************")
-    for mname, mvalue in labelList.iteritems():
-        print(mname)
-    sys.exit(1)
-
-if options.nodes is not None:
-    if options.prom_host is None:
-        options.prom_host = raw_input('Enter Prometheus servet (http://promserver:9090):')
-    instances = get_instance_names(options.prom_host)
-    print("**********************************************")
-    print("*  List of nodes                             *")
-    print("**********************************************")
-    for instance in instances:
-        print(instance)
-    sys.exit(1)
-
-#Check if filter was passed
-
-if options.mfilter is not None:
-    if options.mfilter not in labelList:
-        print("Error: Cannot filter Metrics[ {0} ]not found in the list".format(options.mfilter))
-        sys.exit(1)
 
 
-if options.prom_host is None:
-    options.prom_host = raw_input('Enter Prometheus serve (http://promserver:9090):')
-
-instances = get_instance_names(options.prom_host)
-#Check if filter was passed
-if options.nfilter is not None:
-    if options.nfilter not in instances:
-        print("Error: Cannot filter Nodes [ {0} ]not found in the list".format(options.nfilter))
-        sys.exit(1)
+def generate_report(url,node,metric):
+    ##Set up  writer
+    writer = csv.writer(sys.stdout)
+    filtered_metric={}
+    if metric is None:
+        filtered_metric=labelList
     else:
-        instances = [options.nfilter]
+        filtered_metric[metric]=labelList[metric]
 
-writeHeader = True
-##Set up  writer
-writer = csv.writer(sys.stdout)
+    for instance in instances:
+        #write all header first
+        header_row1 = [""]
+        header_row1.append("")
+        header_row1.append("")
+        header_row2 = ["Node"]
+        header_row2.append("Start Time")
+        header_row2.append("End time")
+        SanitizedResult = defaultdict(list)
+        SanitizedResult = {"node":instance, "starttime":"", "endtime":"", "results":{}}
+        writeNewRow = True
 
-for instance in instances:
+        for mname, mvalue in filtered_metric.iteritems():
+            if mname not in SanitizedResult["results"]:
+                SanitizedResult["results"][mname] = {"Max":[], "Min":[],
+                                                     "Avg":[], "Per":mvalue["metrics"][0]["per"]}
+            for data in mvalue["metrics"]:
+                response = requests.get(options.prom_host+'/api/v1/query?query='+data["name"]+'{instance="'+instance+'"}')
+                results = response.json()['data']["result"]
+                for result in results:
+                    #if result['metric'].get(data["per"],'')=="":
+                    #    print result['metric']
+                    SanitizedResult["starttime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]-3600))
+                    SanitizedResult["endtime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]))
+                    SanitizedResult["results"][mname].get(data["header"], '').append({"value":result['value'][1],
+                                                                                  "per":data["per"], "per_value":result['metric'].get(data["per"], '')})
+            if writeNewRow is True:
+                data_row = [SanitizedResult["node"]]
+                data_row.append(SanitizedResult["starttime"])
+                data_row.append(SanitizedResult["endtime"])
+                writeNewRow = False
+        #Print before goign to next instance
+        for key, value in SanitizedResult["results"].iteritems():
+            for index, item in enumerate(value["Max"]):
+                header_row2.append("Max")
+                header_row2.append("Avg")
+                header_row2.append("Min")
+                try:
+                    data_row.append(value["Max"][index]["value"])
+                    header_row1.append(get_report_header(key, value["Max"][0]["per"], value["Max"][index]["per_value"]))
+                except IndexError:
+                    data_row.append(-1)
+                    header_row1.append(key + "_for_ error")
+                try:
+                    data_row.append(value["Avg"][index]["value"])
+                    header_row1.append(get_report_header(key, value["Avg"][0]["per"], value["Avg"][index]["per_value"]))
+                except IndexError:
+                    data_row.append(-1)
+                    header_row1.append(key + "_for_ error")
+                try:
+                    data_row.append(value["Min"][index]["value"])
+                    header_row1.append(get_report_header(key, value["Min"][0]["per"], value["Min"][index]["per_value"]))
+                except IndexError:
+                    data_row.append(-1)
+                    header_row1.append(key + "_for_ error")
+        writer.writerow(header_row1)
+        writer.writerow(header_row2)
+        writer.writerow(data_row)
 
-    #write all header first
+if __name__ == '__main__':
+    #Main Header
+    parser = OptionParser()
+    instances = set()
+    parser.add_option("-n", "--nodes", action='store_true', help="list all nodes used for the report.")
+    parser.add_option("-l", "--list", action='store_true', help="list all metrics name.")
+    parser.add_option("-m", "--mfilter", dest="mfilter", help="Filter metrics by name.")
+    parser.add_option("-s", "--nfilter", dest="nfilter", help="Filter metrics by node.")
+    parser.add_option("-p", "--prometheus", dest="prom_host", help="http://promethues:9090")
 
-    header_row1 = [""]
-    header_row1.append("")
-    header_row1.append("")
-    header_row2 = ["Node"]
-    header_row2.append("Start Time")
-    header_row2.append("End time")
-    SanitizedResult = defaultdict(list)
-    SanitizedResult = {"node":instance, "starttime":"", "endtime":"", "results":{}}
-    writeNewRow = True
+    (options, args) = parser.parse_args()
 
-    for mname, mvalue in labelList.iteritems():
-        if mname not in SanitizedResult["results"]:
-            SanitizedResult["results"][mname] = {"Max":[], "Min":[],
-                                                 "Avg":[], "Per":mvalue["metrics"][0]["per"]}
-        for data in mvalue["metrics"]:
-            response = requests.get(options.prom_host+'/api/v1/query?query='+data["name"]+'{instance="'+instance+'"}')
-            results = response.json()['data']["result"]
-            for result in results:
-                #if result['metric'].get(data["per"],'')=="":
-                #    print result['metric']
-                SanitizedResult["starttime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]-3600))
-                SanitizedResult["endtime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]))
-                SanitizedResult["results"][mname].get(data["header"], '').append({"value":result['value'][1],
-                                                                              "per":data["per"], "per_value":result['metric'].get(data["per"], '')})
-        if writeNewRow is True:
-            data_row = [SanitizedResult["node"]]
-            data_row.append(SanitizedResult["starttime"])
-            data_row.append(SanitizedResult["endtime"])
-            writeNewRow = False
-    #Print before goign to next instance
-    for key, value in SanitizedResult["results"].iteritems():
-        for index, item in enumerate(value["Max"]):
-            header_row2.append("Max")
-            header_row2.append("Avg")
-            header_row2.append("Min")
-            try:
-                data_row.append(value["Max"][index]["value"])
-                header_row1.append(get_report_header(key, value["Max"][0]["per"], value["Max"][index]["per_value"]))
-            except IndexError:
-                data_row.append(-1)
-                header_row1.append(key + "_for_ error")
-            try:
-                data_row.append(value["Avg"][index]["value"])
-                header_row1.append(get_report_header(key, value["Avg"][0]["per"], value["Avg"][index]["per_value"]))
-            except IndexError:
-                data_row.append(-1)
-                header_row1.append(key + "_for_ error")
-            try:
-                data_row.append(value["Min"][index]["value"])
-                header_row1.append(get_report_header(key, value["Min"][0]["per"], value["Min"][index]["per_value"]))
-            except IndexError:
-                data_row.append(-1)
-                header_row1.append(key + "_for_ error")
-    writer.writerow(header_row1)
-    writer.writerow(header_row2)
-    writer.writerow(data_row)
+    #Check if list was selected
+    if options.list is not None:
+        print("**********************************************")
+        print("*  List of recording rules metrics            *")
+        print("**********************************************")
+        for mname, mvalue in labelList.iteritems():
+            print(mname)
+        sys.exit(1)
+
+    if options.nodes is not None:
+        if options.prom_host is None:
+            options.prom_host = raw_input('Enter Prometheus servet (http://promserver:9090):')
+        instances = get_instance_names(options.prom_host)
+        print("**********************************************")
+        print("*  List of nodes                             *")
+        print("**********************************************")
+        for instance in instances:
+            print(instance)
+        sys.exit(1)
+
+    #Check if filter was passed
+
+    if options.mfilter is not None:
+        if options.mfilter not in labelList:
+            print("Error: Cannot filter Metrics[ {0} ]not found in the list".format(options.mfilter))
+            sys.exit(1)
+
+
+    if options.prom_host is None:
+        options.prom_host = raw_input('Enter Prometheus serve (http://promserver:9090):')
+
+    instances = get_instance_names(options.prom_host)
+    #Check if filter was passed
+    if options.nfilter is not None:
+        if options.nfilter not in instances:
+            print("Error: Cannot filter Nodes [ {0} ]not found in the list".format(options.nfilter))
+            sys.exit(1)
+        else:
+            instances = [options.nfilter]
+
+    generate_report(options.prom_host,instances,options.mfilter)
