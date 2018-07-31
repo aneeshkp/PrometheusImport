@@ -177,17 +177,11 @@ def generate_report(url, nodes, metric):
         for key, value in SanitizedResult["results"].iteritems():
             for index, _ in enumerate(value["Max"]):
                 header_row2.append("Max")
-                header_row2.append("Avg")
                 header_row2.append("Min")
+                header_row2.append("Avg")
                 try:
                     data_row.append(value["Max"][index]["value"])
                     header_row1.append(get_report_header(key, value["Max"][0]["per"], value["Max"][index]["per_value"]))
-                except IndexError:
-                    data_row.append(-1)
-                    header_row1.append(key + "_for_ error")
-                try:
-                    data_row.append(value["Avg"][index]["value"])
-                    header_row1.append(get_report_header(key, value["Avg"][0]["per"], value["Avg"][index]["per_value"]))
                 except IndexError:
                     data_row.append(-1)
                     header_row1.append(key + "_for_ error")
@@ -197,6 +191,13 @@ def generate_report(url, nodes, metric):
                 except IndexError:
                     data_row.append(-1)
                     header_row1.append(key + "_for_ error")
+                try:
+                    data_row.append(value["Avg"][index]["value"])
+                    header_row1.append(get_report_header(key, value["Avg"][0]["per"], value["Avg"][index]["per_value"]))
+                except IndexError:
+                    data_row.append(-1)
+                    header_row1.append(key + "_for_ error")
+
         writer.writerow(header_row1)
         writer.writerow(header_row2)
         writer.writerow(data_row)
