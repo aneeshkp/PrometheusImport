@@ -60,12 +60,6 @@ PROM_METRICS_LIST["CPU User Utilization Summary (percentage)"] = {"metrics":
                                                                   "labels":("__name__", "instance", "cpu")}
 
 PROM_METRICS_LIST["Disk Utilization Summary (percentage)"] = {"metrics":
-                                                              [{"name":"perf_cpu_user_util:max1h", "header":"Max", "per":"cpu"},
-                                                               {"name":"perf_cpu_user_util:min1h", "header":"Min", "per":"cpu"},
-                                                               {"name":"perf_cpu_user_util:avg1h", "header":"Avg", "per":"cpu"}],
-                                                              "labels":("__name__", "instance", "cpu")}
-
-PROM_METRICS_LIST["Disk Utilization Summary (percentage)"] = {"metrics":
                                                               [{"name":"perf_disk_util:max1h", "header":"Max", "per":"df"},
                                                                {"name":"perf_disk_util:min1h", "header":"Min", "per":"df"},
                                                                {"name":"perf_disk_util:avg1h", "header":"Avg", "per":"df"}],
