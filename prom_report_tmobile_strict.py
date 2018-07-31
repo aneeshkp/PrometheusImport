@@ -231,7 +231,7 @@ def parser_commandline():
 
     if args.nodes:
         if args.prom_host is None:
-            args.prom_host = input('Enter Prometheus servet (http://promserver:9090):')
+            args.prom_host = input('Enter Prometheus server (http://promserver:9090):')
         instances = get_instance_names(args.prom_host)
         print("**********************************************")
         print("*  List of nodes                             *")
