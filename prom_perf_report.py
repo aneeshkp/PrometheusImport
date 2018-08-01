@@ -1,4 +1,4 @@
-
+#! /usr/bin/env python
 """
 aputtur@redhat.com
 Prometheus report
@@ -151,52 +151,43 @@ def generate_report(url, nodes, metric):
         header_row2 = ["Node"]
         header_row2.append("Start Time")
         header_row2.append("End time")
-        SanitizedResult = defaultdict(list)
-        SanitizedResult = {"node":node, "starttime":"", "endtime":"", "results":{}}
-        writeNewRow = True
-        for mname, mvalue in filtered_metric.iteritems():
-            if mname not in SanitizedResult["results"]:
-                SanitizedResult["results"][mname] = {"Max":[], "Min":[],
-                                                     "Avg":[], "Per":mvalue["metrics"][0]["per"]}
+        prom_perf_report = defaultdict(list)
+        prom_perf_report = {"node":node, "starttime":"", "endtime":"", "results":{}}
+        write_new_row = True
+        for mname, mvalue in filtered_metric.items():
+            if mname not in prom_perf_report["results"]:
+                prom_perf_report["results"][mname] = {"Max":[], "Min":[],
+                                                      "Avg":[], "Per":mvalue["metrics"][0]["per"]}
             for data in mvalue["metrics"]:
                 response = requests.get(url+'/api/v1/query?query='+data["name"]+'{instance="'+node+'"}')
                 results = response.json()['data']["result"]
                 for result in results:
                     #if result['metric'].get(data["per"],'')=="":
                     #    print result['metric']
-                    SanitizedResult["starttime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]-3600))
-                    SanitizedResult["endtime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]))
-                    SanitizedResult["results"][mname].get(data["header"], '').append({"value":result['value'][1], "per":data["per"],
-                                                                                      "per_value":result['metric'].get(data["per"], '')})
-            if writeNewRow is True:
-                data_row = [SanitizedResult["node"]]
-                data_row.append(SanitizedResult["starttime"])
-                data_row.append(SanitizedResult["endtime"])
-                writeNewRow = False
+                    prom_perf_report["starttime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]-3600))
+                    prom_perf_report["endtime"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(result['value'][0]))
+                    prom_perf_report["results"][mname].get(data["header"], '').append({"value":result['value'][1], "per":data["per"],
+                                                                                       "per_value":result['metric'].get(data["per"], '')})
+            if write_new_row is True:
+                data_row = [prom_perf_report["node"]]
+                data_row.append(prom_perf_report["starttime"])
+                data_row.append(prom_perf_report["endtime"])
+                write_new_row = False
         #Print before goign to next node
-        for key, value in SanitizedResult["results"].iteritems():
-            for index, _ in enumerate(value["Max"]):
+        for key, value in prom_perf_report["results"].items():
+            for max_value, min_value, avg_value in zip(value["Max"], value["Min"], value["Avg"]):
+                #print('Max: {}, Min: {}, Avg: {}'.format(max, min, avg))
                 header_row2.append("Max")
+                data_row.append(max_value["value"])
+                header_row1.append(get_report_header(key, max_value["per"], max_value["per_value"]))
+
                 header_row2.append("Min")
+                data_row.append(min_value["value"])
+                header_row1.append(get_report_header(key, min_value["per"], min_value["per_value"]))
+
                 header_row2.append("Avg")
-                try:
-                    data_row.append(value["Max"][index]["value"])
-                    header_row1.append(get_report_header(key, value["Max"][0]["per"], value["Max"][index]["per_value"]))
-                except IndexError:
-                    data_row.append(-1)
-                    header_row1.append(key + "_for_ error")
-                try:
-                    data_row.append(value["Min"][index]["value"])
-                    header_row1.append(get_report_header(key, value["Min"][0]["per"], value["Min"][index]["per_value"]))
-                except IndexError:
-                    data_row.append(-1)
-                    header_row1.append(key + "_for_ error")
-                try:
-                    data_row.append(value["Avg"][index]["value"])
-                    header_row1.append(get_report_header(key, value["Avg"][0]["per"], value["Avg"][index]["per_value"]))
-                except IndexError:
-                    data_row.append(-1)
-                    header_row1.append(key + "_for_ error")
+                data_row.append(avg_value["value"])
+                header_row1.append(get_report_header(key, avg_value["per"], avg_value["per_value"]))
 
         writer.writerow(header_row1)
         writer.writerow(header_row2)
