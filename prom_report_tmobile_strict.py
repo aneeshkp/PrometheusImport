@@ -1,7 +1,7 @@
 
 """
 aputtur@redhat.com
-Prometheus report for T-Mobile
+Prometheus report
 """
 from __future__ import print_function
 import argparse
@@ -226,7 +226,7 @@ def parser_commandline():
 
     if args.nodes:
         if args.prom_host is None:
-            args.prom_host = input('Enter Prometheus server (http://promserver:9090):')
+            args.prom_host = raw_raw_input('Enter Prometheus server (http://promserver:9090):')
         instances = get_instance_names(args.prom_host)
         print("**********************************************")
         print("*  List of nodes                             *")
@@ -243,7 +243,7 @@ def parser_commandline():
 
 
     if args.prom_host is None:
-        args.prom_host = input('Enter Prometheus serve (http://promserver:9090):')
+        args.prom_host = raw_input('Enter Prometheus serve (http://promserver:9090):')
 
     instances = get_instance_names(args.prom_host)
     #Check if filter was passed
